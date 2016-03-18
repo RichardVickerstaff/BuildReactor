@@ -4,55 +4,40 @@ define([
 ], function (request, Rx) {
 	'use strict';
 
-	var RESULT = { SUCCESS: 0, FAILURE: 1, ERRORED: null, UNKNOWN: null };
-	var STATE = { STARTED: 'started', FINISHED: 'finished', CREATED: 'created' };
-
 	var CircleciBuild = function (id, settings) {
 		this.id = id;
-		var nameAndGroup = id.split('/');
-		this.name = nameAndGroup[1];
-		this.group = nameAndGroup[0];
+		this.name = id.split('/')[1];
+		this.group = id.split('/')[0];
 		this.update = update;
+    this.token = settings.username;
 	};
 
 	var update = function () {
 		var self = this;
-		return request.json({
-			url: 'https://api.travis-ci.org/repositories/' + this.id + '/builds.json'
-		}).selectMany(function (builds) {
-			if (isRunning(builds[0])) {
-				return Rx.Observable.zip(
-					getBuildDetails(builds[0].id),
-					getBuildDetails(builds[1].id),
-					function (runningBuild, previousBuild) {
-						return createRunningBuild(self, runningBuild, previousBuild);
-					});
-			} else {
-				return getBuildDetails(builds[0].id)
-					.map(function (buildDetails) {
-						return createBuild(self, buildDetails);
-					});
-			}
-		});
+    return getBuildDetails(self)
+      .map(function (buildDetails) {
+        return createBuild(self, buildDetails);
+      });
 	};
 
-	var getBuildDetails = function (buildId) {
+	var getBuildDetails = function (self) {
 		return request.json({
-			url: 'https://api.travis-ci.org/builds/' + buildId
+      url: 'https://circleci.com/api/v1/project/' + self.group + '/' + self.name + '?limit=1circle-token=' + self.token
 		});
 	};
 
 	var isRunning = function (build) {
-		return build.state === STATE.STARTED || build.state === STATE.CREATED;
+    return build[0]['status'] === 'running' &&
+           build[0]['status'] === 'queued';
 	};
 
 	var isBroken = function (build) {
-		return build.result === RESULT.FAILURE || isErrored(build);
+    return build[0].status !== 'success' &&
+           build[0].status !== 'fixed';
 	};
 
 	var isErrored = function (build) {
-		return build.state === STATE.FINISHED &&
-			build.result === RESULT.ERRORED;
+		return false;
 	};
 
 	var createBuild = function (self, response) {
@@ -60,32 +45,32 @@ define([
 			id: self.id,
 			name: self.name,
 			group: self.group,
-			webUrl: 'https://travis-ci.org/' + self.id + '/builds/' + response.id,
+      webUrl: response[0].build_url,
 			isBroken: isBroken(response),
-			isRunning: false,
+			isRunning: isRunning(response),
 			changes: [{
-				name: response.committer_name,
-				message: response.message
+				name: response[0].committer_name,
+				message: response[0].subject
 			}]
 		};
 		return result;
 	};
 
-	var createRunningBuild = function (self, runningBuild, previousBuild) {
-		var result = {
-			id: self.id,
-			name: self.name,
-			group: self.group,
-			webUrl: 'https://travis-ci.org/' + self.id + '/builds/' + runningBuild.id,
-			isBroken: isBroken(previousBuild),
-			isRunning: true,
-			changes: [{
-				name: runningBuild.committer_name,
-				message: runningBuild.message
-			}]
-		};
-		return result;
-	};
+	//var createRunningBuild = function (self, runningBuild, previousBuild) {
+		//var result = {
+			//id: self.id,
+			//name: self.name,
+			//group: self.group,
+      //webUrl: 'http://bbc.co.uk',
+			//isBroken: isBroken(previousBuild),
+			//isRunning: true,
+			//changes: [{
+				//name: runningBuild.committer_name,
+				//message: runningBuild.message
+			//}]
+		//};
+		//return result;
+	//};
 
 	return CircleciBuild;
 });

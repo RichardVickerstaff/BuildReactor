@@ -37,7 +37,7 @@ define([
 				return {
 					items: response.map(function (repo) {
 						return {
-							id: repo.reponame,
+              id: repo.username + '/' + repo.reponame,
 							name: repo.reponame,
               group: repo.username,
 							isDisabled: false
