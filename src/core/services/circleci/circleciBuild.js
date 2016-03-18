@@ -27,7 +27,7 @@ define([
 	};
 
 	var isRunning = function (build) {
-    return build[0]['status'] === 'running' &&
+    return build[0]['status'] === 'running' ||
            build[0]['status'] === 'queued';
 	};
 
