@@ -23,7 +23,7 @@ define([
 				baseUrl: 'circleci',
 				name: '',
 				projects: [],
-				username: '',
+				password: '',
 				updateInterval: 60
 			}
 		};
@@ -32,7 +32,7 @@ define([
 	var availableBuilds = function () {
 		return request.json({
 			url: 'https://circleci.com/api/v1/projects',
-			data: { 'token': this.settings.username },
+			data: { 'token': this.settings.password },
 			parser: function (response) {
 				return {
 					items: response.map(function (repo) {

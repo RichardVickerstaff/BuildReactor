@@ -9,7 +9,7 @@ define([
 		this.name = id.split('/')[1];
 		this.group = id.split('/')[0];
 		this.update = update;
-    this.token = settings.username;
+    this.token = settings.password;
 	};
 
 	var update = function () {
