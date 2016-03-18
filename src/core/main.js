@@ -19,7 +19,8 @@ require([
 	'core/services/jenkins/buildService',
 	'core/services/snap/buildService',
 	'core/services/teamcity/buildService',
-	'core/services/travis/buildService'
+	'core/services/travis/buildService',
+	'core/services/circleci/buildService'
 ], function (
 	localStore,
 	backgroundLogger,
@@ -41,7 +42,8 @@ require([
 	JenkinsService,
 	SnapService,
 	TeamCityService,
-	TravisService
+	TravisService,
+	CircleciService
 ) {
 	'use strict';
 
@@ -64,6 +66,7 @@ require([
 	serviceController.registerType(SnapService);
 	serviceController.registerType(TeamCityService);
 	serviceController.registerType(TravisService);
+	serviceController.registerType(CircleciService);
 
 	serviceController.start(serviceConfiguration.changes);
 });
