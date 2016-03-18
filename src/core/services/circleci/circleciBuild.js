@@ -36,10 +36,6 @@ define([
            build[0].status !== 'fixed';
 	};
 
-	var isErrored = function (build) {
-		return false;
-	};
-
 	var createBuild = function (self, response) {
 		var result = {
 			id: self.id,
@@ -55,22 +51,6 @@ define([
 		};
 		return result;
 	};
-
-	//var createRunningBuild = function (self, runningBuild, previousBuild) {
-		//var result = {
-			//id: self.id,
-			//name: self.name,
-			//group: self.group,
-      //webUrl: 'http://bbc.co.uk',
-			//isBroken: isBroken(previousBuild),
-			//isRunning: true,
-			//changes: [{
-				//name: runningBuild.committer_name,
-				//message: runningBuild.message
-			//}]
-		//};
-		//return result;
-	//};
 
 	return CircleciBuild;
 });
