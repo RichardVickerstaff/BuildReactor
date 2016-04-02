@@ -20,20 +20,28 @@ define([
       });
 	};
 
-	var getBuildDetails = function (self) {
+	var getBuildDetails = function (self, limit) {
 		return request.json({
-      url: 'https://circleci.com/api/v1/project/' + self.group + '/' + self.name + '?limit=1circle-token=' + self.token
+      url: 'https://circleci.com/api/v1/project/' + self.group + '/' + self.name + '?circle-token=' + self.token
 		});
 	};
 
+	var isNotRunning = function (build) {
+    return !isRunning(build);
+	};
+
 	var isRunning = function (build) {
-    return build[0]['status'] === 'running' ||
-           build[0]['status'] === 'queued';
+    return build['status'] === 'running' ||
+           build['status'] === 'queued';
+	};
+
+	var isLastFoo = function (builds) {
+    return isBroken(builds.filter(isNotRunning)[0]);
 	};
 
 	var isBroken = function (build) {
-    return build[0].status !== 'success' &&
-           build[0].status !== 'fixed';
+    return build.status !== 'success' &&
+           build.status !== 'fixed';
 	};
 
 	var createBuild = function (self, response) {
@@ -42,8 +50,8 @@ define([
 			name: self.name,
 			group: self.group,
       webUrl: response[0].build_url,
-			isBroken: isBroken(response),
-			isRunning: isRunning(response),
+			isBroken: isLastFoo(response),
+			isRunning: isRunning(response[0]),
 			changes: [{
 				name: response[0].committer_name,
 				message: response[0].subject
